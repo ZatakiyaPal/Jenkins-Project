@@ -1,8 +1,8 @@
 pipeline {
     agent {
-        label: 'devops' 
+        label 'devops' 
     }
-       
+
     stages {
         stage('App Code Checkout') {
           steps {
