@@ -31,10 +31,10 @@ pipeline {
          stage('Push To Registry'){
             steps {
                 sh "docker login -u $DOCKER_REGISTRY_CREDS_USR -p $DOCKER_REGISTRY_CREDS_PSW "
-                sh "docker tag ${params:ImageName}:${params.ImageTag}  $DOCKER_REGISTRY_CREDS_USR/${params:ImageName}:${params.ImageTag}"
-                sh " docker push $DOCKER_REGISTRY_CREDS_USR/${params:ImageName}:${params.ImageTag} "
-                sh " docker rm -f ${params:ImageName}:${params.ImageTag} "
-                sh "docker rm -f $DOCKER_REGISTRY_CREDS_USR/${params:ImageName}:${params.ImageTag} "
+                sh "docker tag ${params.ImageName}:${params.ImageTag}  $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag}"
+                sh " docker push $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag} "
+                sh " docker rm -f ${params.ImageName}:${params.ImageTag} "
+                sh "docker rm -f $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag} "
             }
         }
         stage('container create'){
