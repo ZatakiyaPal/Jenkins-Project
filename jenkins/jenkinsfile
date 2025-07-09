@@ -9,7 +9,7 @@ pipeline {
         string(name: 'ContainerName' , defaultValue: 'jenkinsapp2')
     }
     environment { 
-        DOCKER_REGISTRY_CREDS =  credentials('docker-registy-login')
+        DOCKER_REGISTRY_CREDS =  credentials('docker-registry-login')
     }
     stages {
         stage('App Code Checkout') {
