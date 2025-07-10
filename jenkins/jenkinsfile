@@ -2,12 +2,15 @@ pipeline {
     agent {
         label 'devops' 
     }
-    parameters {
-        string(name: 'ImageName' , defaultValue: 'jenkinsapp')
-        string(name: 'ImageTag' , defaultValue: 'latest')
-        string(name: 'ContainerPort' , defaultValue: '8094')
-        string(name: 'ContainerName' , defaultValue: 'jenkinsapp2')
+    options { 
+        buildDiscarder(logRotator(numToKeepStr: '3')) 
     }
+    // parameters {
+    //     string(name: 'ImageName' , defaultValue: 'jenkinsapp')
+    //     string(name: 'ImageTag' , defaultValue: 'latest')
+    //     string(name: 'ContainerPort' , defaultValue: '8094')
+    //     string(name: 'ContainerName' , defaultValue: 'jenkinsapp2')
+    // }
     environment { 
         DOCKER_REGISTRY_CREDS =  credentials('docker-registry-login')
         SONAR_SCANNER_HOME = tool 'sonar-scanner'
@@ -18,15 +21,14 @@ pipeline {
             git url: 'https://github.com/ZatakiyaPal/Jenkins-Project.git' , branch: 'main'
           }
         }
- 
+               
         stage('Sonar Analysis'){
             steps {
                 dir('src/'){
                   withSonarQubeEnv('sonar-scanner') {
                     sh ''' $SONAR_SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectName=jenkins-docker-pipeline \
-                    -Dsonar.python.version=3.11 \
-                    -Dsonar.projectKey=jenkins-docker-pipeline '''  
+                    -Dsonar.projectName=jenkins-springboot-pipeline \
+                    -Dsonar.projectKey=jenkins-springboot-pipeline '''  
                    }   
                 }
             }
@@ -39,31 +41,32 @@ pipeline {
                 }
             }
         }
-
-        stage('Build Image') {
-            steps {
-                sh "docker build -t ${params.ImageName}:${params.ImageTag} ."
-            }
-        }    
-        stage('Container create'){
-            steps {
-                sh "docker run -dit --name ${params.ContainerName} -p ${params.ContainerPort} ${params.ImageName}:${params.ImageTag}"
-            }
-        }
-        stage('Push To Registry'){
-            steps {
-                sh "docker login -u $DOCKER_REGISTRY_CREDS_USR -p $DOCKER_REGISTRY_CREDS_PSW "
-                sh "docker tag ${params.ImageName}:${params.ImageTag}  $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag}"
-                sh " docker push $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag} "
-                sh " docker rm -f ${params.ImageName}:${params.ImageTag} "
-                sh "docker rm -f $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag} "
-            }
-        }
-        stage('container create'){
-            steps{
-                sh "docker rm -f ${params.ContainerName}"
-                sh "docker run -dit --name ${params.ContainerName} -p ${params.ContainerPort}:80 $DOCKER_REGISTRY_CREDS_USR/${params:ImageName}:${params.ImageTag}"
-            }
-        }
     }
 }
+//         stage('Build Image') {
+//             steps {
+//                 sh "docker build -t ${params.ImageName}:${params.ImageTag} ."
+//             }
+//         }    
+//         stage('Container create'){
+//             steps {
+//                 sh "docker run -dit --name ${params.ContainerName} -p ${params.ContainerPort} ${params.ImageName}:${params.ImageTag}"
+//             }
+//         }
+//         stage('Push To Registry'){
+//             steps {
+//                 sh "docker login -u $DOCKER_REGISTRY_CREDS_USR -p $DOCKER_REGISTRY_CREDS_PSW "
+//                 sh "docker tag ${params.ImageName}:${params.ImageTag}  $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag}"
+//                 sh " docker push $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag} "
+//                 sh " docker rm -f ${params.ImageName}:${params.ImageTag} "
+//                 sh "docker rm -f $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag} "
+//             }
+//         }
+//         stage('container create'){
+//             steps{
+//                 sh "docker rm -f ${params.ContainerName}"
+//                 sh "docker run -dit --name ${params.ContainerName} -p ${params.ContainerPort}:80 $DOCKER_REGISTRY_CREDS_USR/${params:ImageName}:${params.ImageTag}"
+//             }
+//         }
+//     }
+// }
