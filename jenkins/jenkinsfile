@@ -10,12 +10,34 @@ pipeline {
     }
     environment { 
         DOCKER_REGISTRY_CREDS =  credentials('docker-registry-login')
+        SONNAR_SCANNER_HOME = tool 'sonar-scanner'
     }
     stages {
         stage('App Code Checkout') {
           steps {
             git url: 'https://github.com/ZatakiyaPal/Jenkins-Project.git' , branch: 'main'
           }
+        }
+ 
+        stage('Sonar Analysis'){
+            steps {
+                dir('src/'){
+                  withSonarQubeEnv('sonar-scanner') {
+                    sh ''' $SONAR_SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=jenkins-docker-pipeline \
+                    -Dsonar.python.version=3.11 \
+                    -Dsonar.projectKey=jenkins-docker-pipeline '''  
+                   }   
+                }
+            }
+        }
+
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true, credentialsId: 'sonar-token'
+                }
+            }
         }
 
         stage('Build Image') {
@@ -28,7 +50,7 @@ pipeline {
                 sh "docker run -dit --name ${params.ContainerName} -p ${params.ContainerPort} ${params.ImageName}:${params.ImageTag}"
             }
         }
-         stage('Push To Registry'){
+        stage('Push To Registry'){
             steps {
                 sh "docker login -u $DOCKER_REGISTRY_CREDS_USR -p $DOCKER_REGISTRY_CREDS_PSW "
                 sh "docker tag ${params.ImageName}:${params.ImageTag}  $DOCKER_REGISTRY_CREDS_USR/${params.ImageName}:${params.ImageTag}"
