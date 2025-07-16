@@ -13,7 +13,7 @@ pipeline {
     // }
     environment { 
         DOCKER_REGISTRY_CREDS =  credentials('docker-registry-login')
-        SONAR_SCANNER_HOME = tool 'sonar-scanner'
+        SONAR_SCANNER_HOME = tool 'sonar-scan'
     }
     stages {
         stage('App Code Checkout') {
@@ -25,8 +25,8 @@ pipeline {
         stage('Sonar Analysis'){
             steps {
                 dir('src/'){
-                  withSonarQubeEnv('sonar-scanner') {
-                    sh ''' $SONAR_SCANNER_HOME/bin/sonar-scanner \
+                  withSonarQubeEnv('sonar-scan') {
+                    sh ''' $SONAR_SCANNER_HOME/bin/sonar-scan \
                     -Dsonar.projectName=jenkins-docker-pipeline \
                     -Dsonar.projectKey=jenkins-docker-pipeline '''  
                    }   
