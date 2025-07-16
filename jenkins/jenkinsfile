@@ -27,8 +27,8 @@ pipeline {
                 dir('src/'){
                   withSonarQubeEnv('sonar-scanner') {
                     sh ''' $SONAR_SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectName=jenkins-springboot-pipeline \
-                    -Dsonar.projectKey=jenkins-springboot-pipeline '''  
+                    -Dsonar.projectName=jenkins-docker-pipeline \
+                    -Dsonar.projectKey=jenkins-docker-pipeline '''  
                    }   
                 }
             }
